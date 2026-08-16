@@ -35,34 +35,38 @@ Excluded the .gitignore, .next and folders together with the .env files which en
 
 ## Dockerfile
 
-The docker file in on this branch is just the minimum dockerfile which doesn't consider optimizing the image.
+The docker file on this branch is a multistaged docker file which optimizes the image size.
 
-It does the following
+It is divided into 2 stages: builder and runner. This reduces the size of the image as only the files created in the last stage will be found in the image, all the files in the other stages before will be discarded. Also, the nextconfig output property is set to "standalone" to make nextjs to install just the dependencies which are needed, create a server.js file which will be used to run the project, and also keep the source code as well.
 
-- FROM node:20-alpine
+1. FROM node:20-alpine AS builder ---start of the builder stage
 
-Starts the stage from the alpine image
+2. WORKDIR /app --- sets the working directory to /app
 
-- WORKDIR /app
+3. COPY package\*.json ./ --- copies the package.json and package-lock.json files from the home directory to the image
 
-Sets the working directory to /app
+4. RUN npm install -- install project depenencies
 
-- COPY . .
+5. COPY . . --- copies all files from the home dir to the image
 
-Copies the whole project to the current working directory. All project files will be present in this layer of the image hence making its size a bit larger
+6. RUN npm run build --- builds project
 
-- RUN npm install
+7. FROM node:20-alpine AS runner --- starts the runner stage. When the docker file is done running, all the dependencies and files found in the builder stage will be discarded, hence a smaller image size at the end.
 
-Installs project dependencies.The main culprit responsible for the image bieng very large together withe the copy line. It bundles all the node_modules and project dependencies in one layer without removing cache
+8. WORKDIR /app --- sets the work directory
 
-- EXPOSE 3000
+9. ENV NODE_ENV=production --- sets the environment variables
 
-Exposes the port 3000
+10. COPY --from=builder /app/public ./public --- copies the public file from the builder stage since the standalone which was set doesn't copy the public folder
 
-- CMD ["npm", "run", "dev"]
+11. COPY --from=builder /app/.next/standalone ./ --- copies the contents of the standalone directory and places in the working directory. The standalone dir contents will be now used as the contents of the project
 
-Defines the command that will run on startup of the application.
+12. COPY --from=builder /app/.next/static ./.next/static --- copies the static css and js files responsible for the designs seen on the application. So at this stage, the public, .next/static and the content of the standalone directory will be in the working directory of the image
 
-Here is an image showing the size of the image with the current dockerfile which was 1.01GB
+13. EXPOSE 3000 --- exposes the port 3000
 
-![alt text](image.png)
+14. CMD ["node", "server.js"] --- runs the server.js file which was gotten from the standalone directory
+
+Here is an image showing the size of the image with the current dockerfile which was 201.32MB
+
+![alt text](image-1.png)
