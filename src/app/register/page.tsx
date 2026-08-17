@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
@@ -14,7 +14,7 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  async function handleSubmit(e) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
     setSubmitting(true);
@@ -22,7 +22,7 @@ export default function RegisterPage() {
       await register(username, password, email || undefined);
       router.push("/");
     } catch (err) {
-      setError(err.message || "Failed to register.");
+      setError(err instanceof Error ? err.message : "Failed to register.");
     } finally {
       setSubmitting(false);
     }

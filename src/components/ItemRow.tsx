@@ -2,8 +2,16 @@
 
 import { useState } from "react";
 import ItemForm from "./ItemForm";
+import type { ItemObject } from "@/lib/parse";
 
-export default function ItemRow({ item, onToggle, onEdit, onDelete }) {
+interface ItemRowProps {
+  item: ItemObject;
+  onToggle: (item: ItemObject) => Promise<void>;
+  onEdit: (item: ItemObject, name: string) => Promise<void>;
+  onDelete: (item: ItemObject) => Promise<void>;
+}
+
+export default function ItemRow({ item, onToggle, onEdit, onDelete }: ItemRowProps) {
   const [editing, setEditing] = useState(false);
   const [deleting, setDeleting] = useState(false);
 

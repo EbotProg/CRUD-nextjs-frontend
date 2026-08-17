@@ -1,12 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 
-export default function ItemForm({ initialName = "", onSubmit, onCancel, submitLabel = "Save" }) {
+interface ItemFormProps {
+  initialName?: string;
+  onSubmit: (name: string) => Promise<void>;
+  onCancel?: () => void;
+  submitLabel?: string;
+}
+
+export default function ItemForm({
+  initialName = "",
+  onSubmit,
+  onCancel,
+  submitLabel = "Save",
+}: ItemFormProps) {
   const [name, setName] = useState(initialName);
   const [submitting, setSubmitting] = useState(false);
 
-  async function handleSubmit(e) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!name.trim() || submitting) return;
     setSubmitting(true);

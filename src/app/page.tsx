@@ -2,14 +2,18 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import Parse from "@/lib/parse";
+import Parse, { type ItemAttributes, type ItemObject } from "@/lib/parse";
 import { useAuth } from "@/context/AuthContext";
 import ItemForm from "@/components/ItemForm";
 import ItemRow from "@/components/ItemRow";
 
+function errorMessage(err: unknown, fallback: string): string {
+  return err instanceof Error ? err.message : fallback;
+}
+
 export default function HomePage() {
   const { user, loading: authLoading } = useAuth();
-  const [items, setItems] = useState([]);
+  const [items, setItems] = useState<ItemObject[]>([]);
   const [loadingItems, setLoadingItems] = useState(true);
   const [error, setError] = useState("");
 
@@ -17,12 +21,12 @@ export default function HomePage() {
     setLoadingItems(true);
     setError("");
     try {
-      const query = new Parse.Query("Item");
+      const query = new Parse.Query<ItemObject>("Item");
       query.descending("createdAt");
       const results = await query.find();
       setItems(results);
     } catch (err) {
-      setError(err.message || "Failed to load items.");
+      setError(errorMessage(err, "Failed to load items."));
     } finally {
       setLoadingItems(false);
     }
@@ -32,49 +36,48 @@ export default function HomePage() {
     if (user) fetchItems();
   }, [user, fetchItems]);
 
-  async function handleCreate(name) {
+  async function handleCreate(name: string) {
     setError("");
     try {
-      const Item = Parse.Object.extend("Item");
-      const item = new Item();
+      const item = new Parse.Object<ItemAttributes>("Item");
       item.set("name", name);
       item.set("completed", false);
       const saved = await item.save();
       setItems((prev) => [saved, ...prev]);
     } catch (err) {
-      setError(err.message || "Failed to create item.");
+      setError(errorMessage(err, "Failed to create item."));
     }
   }
 
-  async function handleToggle(item) {
+  async function handleToggle(item: ItemObject) {
     setError("");
     try {
       item.set("completed", !item.get("completed"));
       await item.save();
       setItems((prev) => [...prev]);
     } catch (err) {
-      setError(err.message || "Failed to update item.");
+      setError(errorMessage(err, "Failed to update item."));
     }
   }
 
-  async function handleEdit(item, name) {
+  async function handleEdit(item: ItemObject, name: string) {
     setError("");
     try {
       item.set("name", name);
       await item.save();
       setItems((prev) => [...prev]);
     } catch (err) {
-      setError(err.message || "Failed to update item.");
+      setError(errorMessage(err, "Failed to update item."));
     }
   }
 
-  async function handleDelete(item) {
+  async function handleDelete(item: ItemObject) {
     setError("");
     try {
       await item.destroy();
       setItems((prev) => prev.filter((i) => i.id !== item.id));
     } catch (err) {
-      setError(err.message || "Failed to delete item.");
+      setError(errorMessage(err, "Failed to delete item."));
     }
   }
 
