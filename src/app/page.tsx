@@ -90,13 +90,19 @@ export default function HomePage() {
       <main className="mx-auto max-w-2xl px-4 py-10 text-center">
         <h1 className="text-xl font-semibold">Welcome</h1>
         <p className="mt-2 text-black/60 dark:text-white/60">
-          Log in or register to manage your items.
+          Log in or register to manage your items.(AN UPDATE)
         </p>
         <div className="mt-4 flex justify-center gap-4">
-          <Link href="/login" className="rounded bg-foreground px-4 py-2 text-sm text-background">
+          <Link
+            href="/login"
+            className="rounded bg-foreground px-4 py-2 text-sm text-background"
+          >
             Log in
           </Link>
-          <Link href="/register" className="rounded border border-black/10 px-4 py-2 text-sm dark:border-white/10">
+          <Link
+            href="/register"
+            className="rounded border border-black/10 px-4 py-2 text-sm dark:border-white/10"
+          >
             Register
           </Link>
         </div>
@@ -112,13 +118,17 @@ export default function HomePage() {
         <ItemForm submitLabel="Add" onSubmit={handleCreate} />
       </div>
 
-      {error && <p className="mt-4 text-sm text-red-600 dark:text-red-400">{error}</p>}
+      {error && (
+        <p className="mt-4 text-sm text-red-600 dark:text-red-400">{error}</p>
+      )}
 
       <div className="mt-6">
         {loadingItems ? (
           <p className="text-black/60 dark:text-white/60">Loading items…</p>
         ) : items.length === 0 ? (
-          <p className="text-black/60 dark:text-white/60">No items yet. Add one above.</p>
+          <p className="text-black/60 dark:text-white/60">
+            No items yet. Add one above.
+          </p>
         ) : (
           <ul className="divide-y divide-black/10 dark:divide-white/10">
             {items.map((item) => (
