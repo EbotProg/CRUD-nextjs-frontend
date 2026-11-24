@@ -82,6 +82,8 @@ COPY --from=builder --chown=node:node /app/.next/static ./.next/static
 # If you want to persist the fetch cache generated during the build so that
 # cached responses are available immediately on startup, uncomment this line:
 # COPY --from=builder --chown=node:node /app/.next/cache ./.next/cache
+# Remove npm/npx from the runtime image: the app runs with "node", and npm only adds vulnerabilities
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx
 # Switch to non-root user for security best practices
 USER node
 # Expose port 3000 to allow HTTP traffic
